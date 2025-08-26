@@ -1,0 +1,1 @@
+web: gunicorn main:app --bind 0.0.0.0:25005 --workers 2 --threads 4
