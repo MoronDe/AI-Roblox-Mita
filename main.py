@@ -16,7 +16,6 @@ console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(
 logger.addHandler(console_handler)
 
 port = 25005
-
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_KEY:
     raise RuntimeError("OPENAI_API_KEY is not set")
@@ -51,12 +50,17 @@ def extract_action_from_output(text):
             continue
     return action, face, player_face, goto, text.strip() or "..."
 
-def load_prompt(language="RU"):
-    path = os.path.join("prompts", f"{language}.txt")
+def load_prompt(character="Crazy Mita", language="EN"):
+    path = os.path.join("prompts", character, f"{language}.txt")
     if not os.path.exists(path):
-        return load_prompt("EN")
+        fallback = os.path.join("prompts", character, "EN.txt")
+        if os.path.exists(fallback):
+            path = fallback
+        else:
+            raise FileNotFoundError(f"Prompt not found for {character} in {language}")
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
+
 
 @app.route('/ask', methods=['POST'])
 def ask():
@@ -68,8 +72,8 @@ def ask():
     history = data.get('history', [])
     lang = data.get('lang', 'RU').upper()
     model_choice = data.get('model', 'openai')  # 'openai' or 'gemini'
-
-    character_instructions = load_prompt(lang)
+    character = data.get('character', 'Crazy Mita')
+    character_instructions = load_prompt(character, lang)
 
     try:
         if model_choice == 'openai':
