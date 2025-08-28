@@ -128,7 +128,9 @@ def ask():
                 )
             )
             if completion.candidates and len(completion.candidates) > 0:
-                answer_generated = completion.candidates[0].content.strip()
+                parts = completion.candidates[0].content
+                text_parts = [p.text for p in parts if hasattr(p, "text") and p.text]
+                answer_generated = " ".join(text_parts).strip() if text_parts else "..."
             else:
                 answer_generated = "..."
         else:
