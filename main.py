@@ -90,7 +90,7 @@ def ask():
             answer_generated = completion.choices[0].message.content.strip()
 
         elif model_choice == 'gemini':
-            gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+            gemini_model = genai.GenerativeModel("gemini-2.5-flash")
 
             conversation = character_instructions + "\n\n"
             for msg in history:
