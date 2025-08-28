@@ -2,13 +2,12 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 import google.generativeai as genai
 from dotenv import load_dotenv
-import os, json, re, logging, warnings, signal, time, threading
+import os, json, re, logging, warnings, signal
 
 load_dotenv()
+warnings.filterwarnings("ignore", category=UserWarning)
 
-warnings.filterwarnings("ignore", category=UserWarning)  # sybau error
-
-# Logger
+# Logger setup
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
@@ -19,7 +18,6 @@ port = 25005
 OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_KEY:
     raise RuntimeError("OPENAI_API_KEY is not set")
-
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_KEY:
     raise RuntimeError("GEMINI_API_KEY is not set")
@@ -28,35 +26,7 @@ os.environ["OPENAI_API_KEY"] = OPENAI_KEY
 client_openai = OpenAI()
 genai.configure(api_key=GEMINI_KEY)
 
-# Flask
 app = Flask(__name__)
-
-SESSION_TTL = 30*60
-gemini_sessions = {}
-
-def cleanup_sessions():
-    while True:
-        now = time.time()
-        for sid, sess in list(gemini_sessions.items()):
-            if now - sess["last_active"] > SESSION_TTL:
-                logger.info(f"Cleaning up inactive session: {sid}")
-                del gemini_sessions[sid]
-        time.sleep(60)
-
-cleanup_thread = threading.Thread(target=cleanup_sessions, daemon=True)
-cleanup_thread.start()
-
-def get_gemini_session(session_id, character_instructions):
-    now = time.time()
-    if session_id not in gemini_sessions:
-        model = genai.GenerativeModel("gemini-2.5-flash")
-        chat = model.start_chat(
-            history=[{"role": "model", "parts": [character_instructions]}]
-        )
-        gemini_sessions[session_id] = {"chat": chat, "last_active": now}
-    else:
-        gemini_sessions[session_id]["last_active"] = now
-    return gemini_sessions[session_id]["chat"]
 
 def extract_action_from_output(text):
     action = face = player_face = goto = None
@@ -77,6 +47,7 @@ def extract_action_from_output(text):
             continue
     return action, face, player_face, goto, text.strip() or "..."
 
+# Load prompt from file
 def load_prompt(character="Crazy Mita", language="EN"):
     path = os.path.join("prompts", character, f"{language}.txt")
     if not os.path.exists(path):
@@ -88,7 +59,6 @@ def load_prompt(character="Crazy Mita", language="EN"):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
@@ -96,7 +66,6 @@ def ask():
         return jsonify({'error': 'No prompt provided'}), 400
 
     user_prompt = data['prompt'].strip()
-    session_id = data.get('session_id', 'default')
     history = data.get('history', [])
     lang = data.get('lang', 'RU').upper()
     model_choice = data.get('model', 'openai')  # 'openai' or 'gemini'
@@ -118,24 +87,22 @@ def ask():
             answer_generated = completion.choices[0].message.content.strip()
 
         elif model_choice == 'gemini':
-            chat = get_gemini_session(session_id, character_instructions)
-            completion = chat.send_message(
-                user_prompt,
+            gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+            conversation = character_instructions + "\n\n"
+            for msg in history:
+                role = msg["role"]
+                conversation += f"{role.capitalize()}: {msg['content']}\n"
+            conversation += f"User: {user_prompt}\nAssistant:"
+            completion = gemini_model.generate_content(
+                conversation,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.8,
                     top_p=0.9,
-                    max_output_tokens=512
+                    max_output_tokens=2048
                 )
             )
-
-            if completion.candidates and len(completion.candidates) > 0:
-                candidate = completion.candidates[0]
-                text = "..."
-                if candidate.content and hasattr(candidate.content, "parts") and candidate.content.parts:
-                    part = candidate.content.parts[0]
-                    if hasattr(part, "text") and part.text:
-                        text = part.text.strip()
-                answer_generated = text
+            if completion.candidates and completion.candidates[0].content.parts:
+                answer_generated = completion.candidates[0].content.parts[0].text.strip()
             else:
                 answer_generated = "..."
         else:
@@ -158,10 +125,10 @@ def ask():
 
 @app.route('/')
 def home():
-    return "AI Mita is running."
+    return "AI Mita (OpenAI + Gemini) running."
 
-signal.signal(signal.SIGINT, lambda s,f: exit(0))
-signal.signal(signal.SIGTERM, lambda s,f: exit(0))
+signal.signal(signal.SIGINT, lambda s, f: exit(0))
+signal.signal(signal.SIGTERM, lambda s, f: exit(0))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=False)
