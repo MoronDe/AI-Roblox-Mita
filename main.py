@@ -87,7 +87,7 @@ def ask():
             answer_generated = completion.choices[0].message.content.strip()
 
         elif model_choice == 'gemini':
-            gemini_model = genai.GenerativeModel("gemini-2.5-flash")
+            gemini_model = genai.GenerativeModel("gemini-2.0-flash")
             conversation = character_instructions + "\n\n"
             for msg in history:
                 role = msg["role"]
@@ -125,7 +125,7 @@ def ask():
 
 @app.route('/')
 def home():
-    return "AI Mita (OpenAI + Gemini) running."
+    return "AI Mita is running."
 
 signal.signal(signal.SIGINT, lambda s, f: exit(0))
 signal.signal(signal.SIGTERM, lambda s, f: exit(0))
