@@ -127,7 +127,17 @@ def ask():
                     max_output_tokens=512
                 )
             )
-            answer_generated = completion.text.strip() if completion.text else "..."
+
+            if completion.candidates and len(completion.candidates) > 0:
+                candidate = completion.candidates[0]
+                text = "..."
+                if candidate.content and hasattr(candidate.content, "parts") and candidate.content.parts:
+                    part = candidate.content.parts[0]
+                    if hasattr(part, "text") and part.text:
+                        text = part.text.strip()
+                answer_generated = text
+            else:
+                answer_generated = "..."
         else:
             return jsonify({'error': 'Invalid model choice'}), 400
 
