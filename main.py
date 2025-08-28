@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 import google.generativeai as genai
 from dotenv import load_dotenv
-import os, json, re, logging, warnings, signal
+import os, json, re, logging, warnings, signal, time, threading
 
 load_dotenv()
 
@@ -30,6 +30,33 @@ genai.configure(api_key=GEMINI_KEY)
 
 # Flask
 app = Flask(__name__)
+
+SESSION_TTL = 30*60
+gemini_sessions = {}
+
+def cleanup_sessions():
+    while True:
+        now = time.time()
+        for sid, sess in list(gemini_sessions.items()):
+            if now - sess["last_active"] > SESSION_TTL:
+                logger.info(f"Cleaning up inactive session: {sid}")
+                del gemini_sessions[sid]
+        time.sleep(60)
+
+cleanup_thread = threading.Thread(target=cleanup_sessions, daemon=True)
+cleanup_thread.start()
+
+def get_gemini_session(session_id, character_instructions):
+    now = time.time()
+    if session_id not in gemini_sessions:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        chat = model.start_chat(
+            history=[{"role": "model", "parts": [character_instructions]}]
+        )
+        gemini_sessions[session_id] = {"chat": chat, "last_active": now}
+    else:
+        gemini_sessions[session_id]["last_active"] = now
+    return gemini_sessions[session_id]["chat"]
 
 def extract_action_from_output(text):
     action = face = player_face = goto = None
@@ -69,6 +96,7 @@ def ask():
         return jsonify({'error': 'No prompt provided'}), 400
 
     user_prompt = data['prompt'].strip()
+    session_id = data.get('session_id', 'default')
     history = data.get('history', [])
     lang = data.get('lang', 'RU').upper()
     model_choice = data.get('model', 'openai')  # 'openai' or 'gemini'
@@ -90,28 +118,16 @@ def ask():
             answer_generated = completion.choices[0].message.content.strip()
 
         elif model_choice == 'gemini':
-            gemini_model = genai.GenerativeModel("gemini-2.5-flash")
-
-            conversation = character_instructions + "\n\n"
-            for msg in history:
-                role = msg["role"]
-                conversation += f"{role.capitalize()}: {msg['content']}\n"
-            conversation += f"User: {user_prompt}\nAssistant:"
-
-            completion = gemini_model.generate_content(
-                conversation,
+            chat = get_gemini_session(session_id, character_instructions)
+            completion = chat.send_message(
+                user_prompt,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.8,
                     top_p=0.9,
-                    max_output_tokens=2048
+                    max_output_tokens=512
                 )
             )
-
-            if completion.candidates and completion.candidates[0].content.parts:
-                answer_generated = completion.candidates[0].content.parts[0].text.strip()
-            else:
-                answer_generated = "..."
-
+            answer_generated = completion.text.strip() if completion.text else "..."
         else:
             return jsonify({'error': 'Invalid model choice'}), 400
 
@@ -132,7 +148,7 @@ def ask():
 
 @app.route('/')
 def home():
-    return "AI Mita (OpenAI + Gemini) running."
+    return "AI Mita is running."
 
 signal.signal(signal.SIGINT, lambda s,f: exit(0))
 signal.signal(signal.SIGTERM, lambda s,f: exit(0))
