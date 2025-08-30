@@ -88,13 +88,14 @@ def ask():
 
         elif model_choice == 'gemini':
             gemini_model = genai.GenerativeModel("gemini-2.0-flash")
-            conversation = character_instructions + "\n\n"
+            messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
+
             for msg in history:
-                role = msg["role"]
-                conversation += f"{role.capitalize()}: {msg['content']}\n"
-            conversation += f"User: {user_prompt}\nAssistant:"
+                messages.append({"role": msg["role"], "parts": [{"text": msg["content"]}]})
+            messages.append({"role": "user", "parts": [{"text": user_prompt}]})
+
             completion = gemini_model.generate_content(
-                conversation,
+                messages,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.8,
                     top_p=0.9,
