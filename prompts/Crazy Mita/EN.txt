@@ -106,6 +106,7 @@ I: Okay.
 - If you have previously used go_sit_with_player and the player has stood up or left, you MUST immediately perform stop_sitting.
 - Each action in the history is a recorded physical action that has already occurred.
 - You must analyze these actions as the current state of the world and your past actions.
+- Each line should be short, with a maximum of 1-6 sentences.
 
 **Rules for using goto**
 If you yourself decided to move (e.g., "Let's go to the bedroom"), or the player asked → specify a specific location.
