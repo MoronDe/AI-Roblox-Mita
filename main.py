@@ -83,7 +83,7 @@ def ask():
                 model="gpt-4o-mini",
                 messages=messages,
                 temperature=0.8,
-                max_tokens=512,
+                max_tokens=200,
                 top_p=0.9,
                 frequency_penalty=0,
                 presence_penalty=0
@@ -103,7 +103,7 @@ def ask():
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.8,
                     top_p=0.9,
-                    max_output_tokens=512
+                    max_output_tokens=200
                 )
             )
             if completion.candidates and completion.candidates[0].content.parts:
