@@ -82,7 +82,7 @@ def ask():
             completion = client_openai.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
-                temperature=0.8,
+                temperature=0.65,
                 max_tokens=200,
                 top_p=0.9,
                 frequency_penalty=0,
@@ -101,7 +101,7 @@ def ask():
             completion = gemini_model.generate_content(
                 messages,
                 generation_config=genai.types.GenerationConfig(
-                    temperature=0.8,
+                    temperature=0.65,
                     top_p=0.9,
                     max_output_tokens=200
                 )
