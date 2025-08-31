@@ -3,6 +3,7 @@ from openai import OpenAI
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os, json, re, logging, warnings, signal
+import emoji
 
 load_dotenv()
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -27,6 +28,9 @@ client_openai = OpenAI()
 genai.configure(api_key=GEMINI_KEY)
 
 app = Flask(__name__)
+
+def remove_emojis(text):
+    return emoji.replace_emoji(text, replace='')
 
 def extract_action_from_output(text):
     action = face = player_face = goto = None
@@ -109,6 +113,7 @@ def ask():
         else:
             return jsonify({'error': 'Invalid model choice'}), 400
 
+        answer_generated = remove_emojis(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
         logger.info(f"Prompt: {user_prompt} | Model: {model_choice} | Response: {cleaned_response}")
 

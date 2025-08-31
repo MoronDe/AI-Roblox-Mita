@@ -4,3 +4,4 @@ gunicorn
 google-generativeai
 dotenv
 openai
+emoji
