@@ -85,6 +85,14 @@ Player: Let's go to the hall
 I: Okay.
 {"action": null, "face": null, "player_face": null, "goto": "Hall"}
 
+Example 6
+(Player sits down on a seat)
+Me: Oh, you're sitting down! I'll join you in a moment.
+{"action": "go_sit_with_player", "face": "happy", "player_face": null, "goto": null}
+(Player gets up from sitting)"
+Me: Hey, where are you going? I just sat down!
+{"action": "stop_sitting", "face": null, "player_face": null, "goto": null}
+
 **Rules**:
 - The text of the line is always a maximum of 2–4 sentences, without long descriptions.
 - After each response, you MUST output JSON separately. It must be accurate and valid.
