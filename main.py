@@ -32,6 +32,9 @@ app = Flask(__name__)
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace='')
 
+def clean_markdown_blocks(text: str) -> str:
+    return re.sub(r"```(?:json|[\w]*)\s*|\s*```", "", text)
+
 def extract_action_from_output(text):
     action = face = player_face = goto = None
     json_matches = re.findall(r'\{.*?\}', text, flags=re.DOTALL)
@@ -114,6 +117,7 @@ def ask():
             return jsonify({'error': 'Invalid model choice'}), 400
 
         answer_generated = remove_emojis(answer_generated)
+        answer_generated = clean_markdown_blocks(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
         logger.info(f"Prompt: {user_prompt} | Model: {model_choice} | Response: {cleaned_response}")
 
