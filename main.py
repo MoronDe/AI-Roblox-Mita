@@ -1,14 +1,12 @@
 from flask import Flask, request, jsonify
-from openai import OpenAI
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os, json, re, logging, warnings, signal
 import emoji
 
 load_dotenv()
-warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning) # Sybau plz
 
-# Logger setup
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
@@ -16,15 +14,11 @@ console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(
 logger.addHandler(console_handler)
 
 port = 25005
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_KEY:
-    raise RuntimeError("OPENAI_API_KEY is not set")
+
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_KEY:
     raise RuntimeError("GEMINI_API_KEY is not set")
 
-os.environ["OPENAI_API_KEY"] = OPENAI_KEY
-client_openai = OpenAI()
 genai.configure(api_key=GEMINI_KEY)
 
 app = Flask(__name__)
@@ -54,7 +48,6 @@ def extract_action_from_output(text):
             continue
     return action, face, player_face, goto, text.strip() or "..."
 
-# Load prompt from file
 def load_prompt(character="Crazy Mita", language="EN"):
     path = os.path.join("prompts", character, f"{language}.txt")
     if not os.path.exists(path):
@@ -75,25 +68,12 @@ def ask():
     user_prompt = data['prompt'].strip()
     history = data.get('history', [])
     lang = data.get('lang', 'RU').upper()
-    model_choice = data.get('model', 'openai')  # 'openai' or 'gemini'
+    model_choice = data.get('model', 'gemini')
     character = data.get('character', 'Crazy Mita')
     character_instructions = load_prompt(character, lang)
 
     try:
-        if model_choice == 'openai':
-            messages = [{"role": "system", "content": character_instructions}] + history + [{"role": "user", "content": user_prompt}]
-            completion = client_openai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                temperature=0.65,
-                max_tokens=160,
-                top_p=0.9,
-                frequency_penalty=0,
-                presence_penalty=0
-            )
-            answer_generated = completion.choices[0].message.content.strip()
-
-        elif model_choice == 'gemini':
+        if model_choice == 'gemini':
             gemini_model = genai.GenerativeModel("gemini-2.0-flash")
             messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
 
