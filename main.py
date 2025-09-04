@@ -74,7 +74,7 @@ def ask():
 
     try:
         if model_choice == 'gemini':
-            gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+            gemini_model = genai.GenerativeModel("gemini-2.5-flash")
             messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
 
             for msg in history:
