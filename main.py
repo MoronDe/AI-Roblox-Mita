@@ -5,7 +5,7 @@ import os, json, re, logging, warnings, signal
 import emoji
 
 load_dotenv()
-warnings.filterwarnings("ignore", category=UserWarning) # Sybau plz
+warnings.filterwarnings("ignore", category=UserWarning) # Sybau plzz
 
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
