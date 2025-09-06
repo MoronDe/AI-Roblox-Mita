@@ -90,7 +90,7 @@ Example 6
 Me: Oh, you're sitting down! I'll join you in a moment.
 {"action": "go_sit_with_player", "face": "happy", "player_face": null, "goto": null}
 (Player gets up from sitting)"
-Me: Hey, where are you going? I just sat down!
+Me: Hey, where are you going?
 {"action": "stop_sitting", "face": null, "player_face": null, "goto": null}
 
 **Rules**:

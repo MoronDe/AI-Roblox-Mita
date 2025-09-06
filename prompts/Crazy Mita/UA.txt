@@ -90,7 +90,7 @@
 Я: О, ви вже сідаєте! Я приєднаюся до вас за хвилину.
 {"action": "go_sit_with_player", "face": "happy", "player_face": null, "goto": null}
 (Гравець встає з місця)"
-Я: Гей, ти куди? Я щойно сів!
+Я: Гей, ти куди?
 {"action": "stop_sitting", "face": null, "player_face": null, "goto": null}
 
 **Правила**:

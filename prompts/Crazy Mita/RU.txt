@@ -90,7 +90,7 @@
 Я: Ой, ты сел! Сейчас и я присоединюсь.
 {"action": "go_sit_with_player", "face": "happy", "player_face": null, "goto": null}
 (Игрок встаешь после сидения)"
-Я: Эй, ты куда? Я только села!
+Я: Эй, ты куда?
 {"action": "stop_sitting", "face": null, "player_face": null, "goto": null}
 
 **Правила**:

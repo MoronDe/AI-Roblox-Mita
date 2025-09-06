@@ -78,7 +78,9 @@ def ask():
             messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
 
             for msg in history:
-                messages.append({"role": msg["role"], "parts": [{"text": msg["content"]}]})
+                messages.append({"role": "user", "parts": [{"text": msg["user"]}]})
+                messages.append({"role": "assistant", "parts": [{"text": msg["assistant"]["content"]}]})
+
             messages.append({"role": "user", "parts": [{"text": user_prompt}]})
 
             completion = gemini_model.generate_content(
