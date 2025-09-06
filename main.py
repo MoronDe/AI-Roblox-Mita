@@ -101,7 +101,10 @@ def ask():
         answer_generated = remove_emojis(answer_generated)
         answer_generated = clean_markdown_blocks(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
-        logger.info(f"Prompt: {user_prompt} | Model: {model_choice} | Response: {cleaned_response}")
+        logger.info(
+            f"Prompt: {user_prompt} | Model: {model_choice} | "
+            f"Response: {cleaned_response} | Action: {action} | Goto: {goto}"
+        )
 
     except Exception as e:
         logger.exception("Exception during /ask")
