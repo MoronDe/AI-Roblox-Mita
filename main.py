@@ -5,7 +5,7 @@ import os, json, re, logging, warnings, signal
 import emoji
 
 load_dotenv()
-warnings.filterwarnings("ignore", category=UserWarning) # Sybau plzz
+warnings.filterwarnings("ignore", category=UserWarning) # sybau plz
 
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
@@ -29,44 +29,66 @@ def remove_emojis(text):
 def clean_markdown_blocks(text: str) -> str:
     return re.sub(r"```(?:json|[\w]*)\s*|\s*```", "", text)
 
-def extract_action_from_output(text):
-    action = face = player_face = goto = None
+def extract_action_from_output(text: str):
+    action = None
+    face = None
+    player_face = None
+    goto = None
+
+    def try_parse_json(s):
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError:
+            return None
+
     json_matches = re.findall(r'\{.*?\}', text, flags=re.DOTALL)
     for json_str in json_matches:
-        try:
-            data = json.loads(json_str)
-            raw_action = data.get("action", action)
-            if isinstance(raw_action, str) and ',' in raw_action:
+        data = try_parse_json(json_str)
+        if not data:
+            continue
+
+        raw_action = data.get("action")
+        if isinstance(raw_action, str):
+            if ',' in raw_action:
                 action = [a.strip() for a in raw_action.split(',')]
             else:
-                action = raw_action
-            face = data.get("face") or data.get("facial expression", face)
-            player_face = data.get("player_face", player_face)
-            goto = data.get("goto", goto)
-            text = text.replace(json_str, '')
-        except json.JSONDecodeError:
-            continue
-    return action, face, player_face, goto, text.strip() or "..."
+                action = raw_action.strip()
+        elif isinstance(raw_action, list):
+            action = raw_action
+
+        face = data.get("face") or face
+        player_face = data.get("player_face") or player_face
+        goto = data.get("goto") or goto
+
+        text = text.replace(json_str, '')
+
+    cleaned_text = text.strip()
+    if not cleaned_text:
+        cleaned_text = "..."
+
+    return action, face, player_face, goto, cleaned_text
 
 def load_prompt(character="Crazy Mita", language="EN"):
-    path = os.path.join("prompts", character, f"{language}.txt")
+    base_path = os.path.join("prompts", character)
+    path = os.path.join(base_path, f"{language}.txt")
     if not os.path.exists(path):
-        fallback = os.path.join("prompts", character, "EN.txt")
+        fallback = os.path.join(base_path, "EN.txt")
         if os.path.exists(fallback):
             path = fallback
         else:
-            raise FileNotFoundError(f"Prompt not found for {character} in {language}")
+            return ""
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
-    if not data or 'prompt' not in data:
-        return jsonify({'error': 'No prompt provided'}), 400
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
 
-    user_prompt = data['prompt'].strip()
+    user_prompt = data.get('prompt', '').strip()
     history = data.get('history', [])
+    events = data.get('events', [])
     lang = data.get('lang', 'RU').upper()
     model_choice = data.get('model', 'gemini')
     character = data.get('character', 'Crazy Mita')
@@ -78,17 +100,25 @@ def ask():
             messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
 
             for msg in history:
-                messages.append({"role": "user", "parts": [{"text": msg["user"]}]})
-                messages.append({"role": "assistant", "parts": [{"text": msg["assistant"]["content"]}]})
+                user_text = msg.get("user")
+                assistant_text = msg.get("assistant", {}).get("content")
+                if user_text:
+                    messages.append({"role": "user", "parts": [{"text": user_text}]})
+                if assistant_text:
+                    messages.append({"role": "assistant", "parts": [{"text": assistant_text}]})
 
-            messages.append({"role": "user", "parts": [{"text": user_prompt}]})
+            for ev in events:
+                messages.append({"role": "user", "parts": [{"text": f"(EVENT) {ev}"}]})
+
+            if not events and user_prompt:
+                messages.append({"role": "user", "parts": [{"text": user_prompt}]})
 
             completion = gemini_model.generate_content(
                 messages,
                 generation_config=genai.types.GenerationConfig(
-                    temperature=0.65,
-                    top_p=0.9,
-                    max_output_tokens=500
+                    temperature=0.3,
+                    top_p=0.8,
+                    max_output_tokens=400,
                 )
             )
             if completion.candidates and completion.candidates[0].content.parts:
@@ -102,7 +132,7 @@ def ask():
         answer_generated = clean_markdown_blocks(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
         logger.info(
-            f"Prompt: {user_prompt} | Model: {model_choice} | "
+            f"Prompt: {user_prompt} | Events: {events} | Model: {model_choice} | "
             f"Response: {cleaned_response} | Action: {action} | Goto: {goto}"
         )
 
