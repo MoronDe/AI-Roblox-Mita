@@ -118,7 +118,7 @@ def ask():
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.3,
                     top_p=0.8,
-                    max_output_tokens=400,
+                    max_output_tokens=350,
                 )
             )
             if completion.candidates and completion.candidates[0].content.parts:
