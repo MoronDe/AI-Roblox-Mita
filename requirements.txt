@@ -2,6 +2,7 @@ flask
 flask_limiter
 gunicorn
 google-generativeai
+mistralai
 dotenv
 openai
 emoji

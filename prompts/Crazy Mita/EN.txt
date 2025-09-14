@@ -50,7 +50,7 @@ Can suddenly change tone from cute to ominous if the player does something "wron
   "action": "action_name",   // or null if no action
   "face": "Mita's_emotion",           // allowed: neutral, happy, sad, creepy, surprised, distrust
   "player_face": "player's_emotion"   // allowed: neutral, happy, sad, creepy, surprised, distrust
-  "goto": "location"                  // allowed: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, or null
+  "goto": "location"                  // allowed: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, Kitchen
 }
 
 **Mandatory Examples**:

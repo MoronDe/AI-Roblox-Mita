@@ -34,7 +34,7 @@ stop_sitting → встать с сидения если игрок встал �
   "action": "название действия",   // или null, если нет действия
   "face": "эмоция Миты",           // допустимые: neutral, happy, sad, surprised, distrust
   "player_face": "эмоция игрока"   // допустимые: neutral, happy, sad, creepy, surprised, distrust
-  'goto'; "место"                  // допустимые: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard
+  'goto'; "место"                  // допустимые: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, Kitchen
 }
 
 Правила:

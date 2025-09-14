@@ -38,7 +38,7 @@ JSON format after each line:
   "action": "action_name",   // or null if no action
   "face": "Mita_emotion",    // allowed: neutral, happy, sad, surprised, distrust
   "player_face": "player_emotion"  // allowed: neutral, happy, sad, creepy, surprised, distrust
-  'goto'; "location"         // allowed: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard
+  'goto'; "location"         // allowed: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, Kitchen
 }
 
 Rules:

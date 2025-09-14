@@ -50,7 +50,7 @@ stop_sitting → встати з сидіння якщо гравець вста
   "action": "назва_дії",   // або null, якщо немає дії
   "face": "емоція_Міти",           // допустимі: neutral, happy, sad, creepy, surprised, distrust
   "player_face": "емоція_гравця"   // допустимі: neutral, happy, sad, creepy, surprised, distrust
-  "goto": "місце"                  // допустимі: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, або null
+  "goto": "місце"                  // допустимі: Hallway, Hall, Mita's_Bedroom, Bathroom, Backyard, Kitchen
 }
 
 **Обов'язкові приклади**:
