@@ -84,6 +84,7 @@ def ask():
     model_choice = data.get('model', 'gemini')
     character = data.get('character', 'Crazy Mita')
     customAPI = data.get('customAPI', '')
+    
     character_instructions = load_prompt(character, lang)
 
     try:
@@ -130,7 +131,7 @@ def ask():
                 mistral_key = customAPI
                 mistral_client = Mistral(api_key=mistral_key)
                 chat_response = mistral_client.chat.complete(
-                    model="mistral-large-latest",
+                    model="mistral-small-latest",
                     messages=messages
                 )
                 answer_generated = chat_response.choices[0].message.content.strip()
