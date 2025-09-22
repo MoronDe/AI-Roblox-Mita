@@ -103,29 +103,36 @@ def ask():
 
         if customAPI:
             if model_choice == "gemini":
-                gemini_key = customAPI
-                genai.configure(api_key=gemini_key)
-                gemini_model = genai.GenerativeModel("gemini-2.0-flash")
-                gemini_messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
-                for m in history:
-                    if m.get("user"):
-                        gemini_messages.append({"role": "user", "parts": [{"text": m["user"]}]})
-                    if m.get("assistant", {}).get("content"):
-                        gemini_messages.append({"role": "assistant", "parts": [{"text": m["assistant"]["content"]}]})
-                for ev in events:
-                    gemini_messages.append({"role": "user", "parts": [{"text": f"(EVENT) {ev}"}]})
-                if not events and user_prompt:
-                    gemini_messages.append({"role": "user", "parts": [{"text": user_prompt}]})
-                completion = gemini_model.generate_content(
-                    gemini_messages,
-                    generation_config=genai.types.GenerationConfig(
-                        temperature=0.3,
-                        top_p=0.8,
-                        max_output_tokens=350,
-                    )
+                mistral_key = customAPI
+                mistral_client = Mistral(api_key=mistral_key)
+                chat_response = mistral_client.chat.complete(
+                    model="mistral-small-latest",
+                    messages=messages
                 )
-                if completion.candidates and completion.candidates[0].content.parts:
-                    answer_generated = completion.candidates[0].content.parts[0].text.strip()
+                answer_generated = chat_response.choices[0].message.content.strip()
+                # gemini_key = customAPI
+                # genai.configure(api_key=gemini_key)
+               # gemini_model = genai.GenerativeModel("gemini-2.0-flash")
+               # gemini_messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
+               # for m in history:
+               #     if m.get("user"):
+               #         gemini_messages.append({"role": "user", "parts": [{"text": m["user"]}]})
+               #     if m.get("assistant", {}).get("content"):
+               #         gemini_messages.append({"role": "assistant", "parts": [{"text": m["assistant"]["content"]}]})
+              #  for ev in events:
+              #      gemini_messages.append({"role": "user", "parts": [{"text": f"(EVENT) {ev}"}]})
+              #  if not events and user_prompt:
+             #       gemini_messages.append({"role": "user", "parts": [{"text": user_prompt}]})
+              #  completion = gemini_model.generate_content(
+              #      gemini_messages,
+              #      generation_config=genai.types.GenerationConfig(
+              #          temperature=0.3,
+             #           top_p=0.8,
+              #          max_output_tokens=350,
+              #      )
+             #   )
+             #   if completion.candidates and completion.candidates[0].content.parts:
+            #        answer_generated = completion.candidates[0].content.parts[0].text.strip()
 
             elif model_choice == "mistral":
                 mistral_key = customAPI
