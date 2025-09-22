@@ -162,7 +162,7 @@ def ask():
                 except Exception as e:
                     logger.error(f"Pollinations decode error: {e} | Raw: {text_resp[:500]}")
 
-        answer_generated = remove_emojis(answer_generated or "...")
+        answer_generated = remove_emojis(answer_generated)
         answer_generated = clean_markdown_blocks(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
 
