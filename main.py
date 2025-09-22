@@ -1,4 +1,4 @@
-import os, json, re, logging, warnings, signal, requests
+import os, json, re, logging, warnings, signal, requests, time
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -15,12 +15,13 @@ console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(
 logger.addHandler(console_handler)
 
 port = 25005
-
 POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_TOKEN")
 if not POLLINATIONS_TOKEN:
     raise RuntimeError("POLLINATIONS_TOKEN not set")
 
 app = Flask(__name__)
+last_request_time = {}
+COOLDOWN = 3
 
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace='')
@@ -72,6 +73,16 @@ def load_prompt(character="Crazy Mita", language="EN"):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
+@app.before_request
+def apply_cooldown():
+    if request.endpoint == "ask":
+        ip = request.remote_addr
+        now = time.time()
+        last_time = last_request_time.get(ip, 0)
+        if now - last_time < COOLDOWN:
+            return jsonify({"error": f"Cooldown {COOLDOWN} sec"}), 429
+        last_request_time[ip] = now
+
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
@@ -84,9 +95,7 @@ def ask():
     model_choice = data.get('model', 'gemini')
     character = data.get('character', 'Crazy Mita')
     customAPI = data.get('customAPI', '')
-    
     character_instructions = load_prompt(character, lang)
-
     try:
         messages = [{"role": "system", "content": character_instructions}]
         for msg in history:
@@ -98,9 +107,7 @@ def ask():
             messages.append({"role": "user", "content": f"(EVENT) {ev}"})
         if not events and user_prompt:
             messages.append({"role": "user", "content": user_prompt})
-
         answer_generated = "..."
-
         if customAPI:
             if model_choice == "gemini":
                 gemini_key = customAPI
@@ -126,7 +133,6 @@ def ask():
                 )
                 if completion.candidates and completion.candidates[0].content.parts:
                     answer_generated = completion.candidates[0].content.parts[0].text.strip()
-
             elif model_choice == "mistral":
                 mistral_key = customAPI
                 mistral_client = Mistral(api_key=mistral_key)
@@ -137,12 +143,10 @@ def ask():
                 answer_generated = chat_response.choices[0].message.content.strip()
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
-
         else:
             url = "https://text.pollinations.ai/openai"
             headers = {"Authorization": f"Bearer {POLLINATIONS_TOKEN}", "Content-Type": "application/json"}
             if model_choice == "gemini":
-                # payload = {"model": "gemini-2.5-flash-lite", "messages": messages, "stream": False} doesnt work rn
                 payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
             elif model_choice == "mistral":
                 payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
@@ -162,17 +166,13 @@ def ask():
                             answer_generated = choice["delta"]["content"].strip()
                 except Exception as e:
                     logger.error(f"Pollinations decode error: {e} | Raw: {text_resp[:500]}")
-
         answer_generated = remove_emojis(answer_generated)
         answer_generated = clean_markdown_blocks(answer_generated)
         action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
-
         logger.info(f"Prompt: {user_prompt} | Events: {events} | Model: {model_choice} | CustomAPI: {bool(customAPI)} | Response: {cleaned_response} | Action: {action} | Goto: {goto}")
-
     except Exception as e:
         logger.exception("Exception during /ask")
         return jsonify({'error': str(e)}), 500
-
     return jsonify({
         'response': cleaned_response,
         'action': action,
