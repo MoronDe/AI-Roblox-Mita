@@ -6,7 +6,7 @@ from mistralai import Mistral
 import emoji
 
 load_dotenv()
-warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=UserWarning) # sybau plz
 
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
@@ -58,7 +58,7 @@ def extract_action_from_output(text: str):
         text = text.replace(json_str, '')
     cleaned_text = text.strip()
     if not cleaned_text:
-        cleaned_text = "..."
+        cleaned_text = ""
     return action, face, player_face, goto, cleaned_text
 
 def load_prompt(character="Crazy Mita", language="EN"):
@@ -96,6 +96,7 @@ def ask():
     character = data.get('character', 'Crazy Mita')
     customAPI = data.get('customAPI', '')
     character_instructions = load_prompt(character, lang)
+
     try:
         messages = [{"role": "system", "content": character_instructions}]
         for msg in history:
@@ -107,7 +108,7 @@ def ask():
             messages.append({"role": "user", "content": f"(EVENT) {ev}"})
         if not events and user_prompt:
             messages.append({"role": "user", "content": user_prompt})
-        answer_generated = "..."
+        answer_generated = ""
         if customAPI:
             if model_choice == "gemini":
                 gemini_key = customAPI
@@ -148,11 +149,13 @@ def ask():
             headers = {"Authorization": f"Bearer {POLLINATIONS_TOKEN}", "Content-Type": "application/json"}
             if model_choice == "gemini":
                 payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
+               # payload = {"model": "gemini-2.5-flash-lite", "messages": messages, "stream": False}
             elif model_choice == "mistral":
                 payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
             r = requests.post(url, headers=headers, json=payload, timeout=20)
+            print(r.text)
             text_resp = r.text.strip()
             if text_resp:
                 try:
