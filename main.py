@@ -148,8 +148,7 @@ def ask():
             url = "https://text.pollinations.ai/openai"
             headers = {"Authorization": f"Bearer {POLLINATIONS_TOKEN}", "Content-Type": "application/json"}
             if model_choice == "gemini":
-                payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
-               # payload = {"model": "gemini-2.5-flash-lite", "messages": messages, "stream": False}
+                payload = {"model": "gemini-2.5-flash-lite", "messages": messages, "stream": False}
             elif model_choice == "mistral":
                 payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
             else:
