@@ -23,6 +23,7 @@ app = Flask(__name__)
 last_request_time = {}
 COOLDOWN = 3
 
+
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace='')
 
