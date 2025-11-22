@@ -155,7 +155,6 @@ def ask():
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
             r = requests.post(url, headers=headers, json=payload, timeout=20)
-            print(r.text)
             text_resp = r.text.strip()
             if text_resp:
                 try:
