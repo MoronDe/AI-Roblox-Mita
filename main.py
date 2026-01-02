@@ -221,9 +221,6 @@ def ask():
             answer_generated
         )
 
-        if not cleaned_response:
-            cleaned_response = "..."
-
         logger.info(
             f"Prompt: {user_prompt} | Events: {events} | "
             f"Model: {model_choice} | CustomAPI: {bool(customAPI)} | "
