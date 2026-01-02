@@ -175,32 +175,35 @@ def ask():
         # ====================== POLLINATIONS ========================
 
         else:
-            url = "https://text.pollinations.ai/openai"
+            url = "https://gen.pollinations.ai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {POLLINATIONS_TOKEN}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             if model_choice == "gemini":
-                payload = {
-                    "model": "gemini-fast",
-                    "messages": messages,
-                    "stream": False
-                }
+                model_name = "gemini"
             elif model_choice == "mistral":
-                payload = {
-                    "model": "mistral",
-                    "messages": messages,
-                    "stream": False
-                }
+                model_name = "mistral"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
-            r = requests.post(url, headers=headers, json=payload, timeout=20)
+            payload = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": 0.3,
+                "top_p": 0.8,
+                "max_tokens": 350,
+                "stream": False,
+            }
+
+            r = requests.post(url, headers=headers, json=payload, timeout=30)
             resp_json = r.json()
 
+            # === OpenAI compatible response ===
             if "choices" in resp_json and resp_json["choices"]:
-                msg = resp_json["choices"][0].get("message", {})
+                choice = resp_json["choices"][0]
+                msg = choice.get("message", {})
                 content = msg.get("content")
 
                 if isinstance(content, str):
