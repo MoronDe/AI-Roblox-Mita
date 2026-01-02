@@ -136,7 +136,7 @@ def ask():
 
                 for m in messages:
                     if m["role"] == "system":
-                        continue  # уже добавили выше
+                        continue
 
                     role = "model" if m["role"] == "assistant" else "user"
 
@@ -153,7 +153,7 @@ def ask():
                     config=types.GenerateContentConfig(
                         temperature=0.3,
                         top_p=0.8,
-                        max_output_tokens=350,
+                        max_output_tokens=700,
                     )
                 )
 
@@ -193,7 +193,7 @@ def ask():
                 "messages": messages,
                 "temperature": 0.3,
                 "top_p": 0.8,
-                "max_tokens": 350,
+                "max_tokens": 700,
                 "stream": False,
             }
 
