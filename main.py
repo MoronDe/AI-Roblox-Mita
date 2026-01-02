@@ -126,10 +126,24 @@ def ask():
                 client = genai.Client(api_key=customAPI)
 
                 contents = []
-                for m in messages:
+
+                if character_instructions:
                     contents.append(
                         types.Content(
-                            role=m["role"],
+                            role="user",
+                            parts=[types.Part(text=character_instructions)]
+                        )
+                    )
+
+                for m in messages:
+                    if m["role"] == "system":
+                        continue  # уже добавили выше
+
+                    role = "model" if m["role"] == "assistant" else "user"
+
+                    contents.append(
+                        types.Content(
+                            role=role,
                             parts=[types.Part(text=m["content"])]
                         )
                     )
