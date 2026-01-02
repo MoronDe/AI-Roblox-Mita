@@ -118,9 +118,8 @@ def ask():
 
         answer_generated = ""
 
-        # ============================================================
         # ====================== CUSTOM API ==========================
-        # ============================================================
+
         if customAPI:
             if model_choice == "gemini":
                 client = genai.Client(api_key=customAPI)
@@ -173,9 +172,8 @@ def ask():
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
-        # ============================================================
         # ====================== POLLINATIONS ========================
-        # ============================================================
+
         else:
             url = "https://text.pollinations.ai/openai"
             headers = {
@@ -185,13 +183,13 @@ def ask():
 
             if model_choice == "gemini":
                 payload = {
-                    "model": "gemini-2.5-flash-lite",
+                    "model": "gemini-fast",
                     "messages": messages,
                     "stream": False
                 }
             elif model_choice == "mistral":
                 payload = {
-                    "model": "mistral-small-3.1-24b-instruct",
+                    "model": "mistral",
                     "messages": messages,
                     "stream": False
                 }
