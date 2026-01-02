@@ -182,7 +182,7 @@ def ask():
             }
 
             if model_choice == "gemini":
-                model_name = "gemini"
+                model_name = "gemini-fast"
             elif model_choice == "mistral":
                 model_name = "mistral"
             else:
