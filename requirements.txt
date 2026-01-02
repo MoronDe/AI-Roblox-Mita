@@ -2,7 +2,8 @@ flask
 flask_cors
 flask_limiter
 gunicorn
-google-generativeai
+google
+google.genai
 mistralai
 dotenv
 openai

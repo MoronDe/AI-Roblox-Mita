@@ -1,7 +1,8 @@
 import os, json, re, logging, warnings, signal, requests, time
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from mistralai import Mistral
 import emoji
 
@@ -22,7 +23,6 @@ if not POLLINATIONS_TOKEN:
 app = Flask(__name__)
 last_request_time = {}
 COOLDOWN = 3
-
 
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace='')
@@ -89,6 +89,7 @@ def ask():
     data = request.json
     if not data:
         return jsonify({'error': 'No data provided'}), 400
+
     user_prompt = data.get('prompt', '').strip()
     history = data.get('history', [])
     events = data.get('events', [])
@@ -96,91 +97,137 @@ def ask():
     model_choice = data.get('model', 'gemini')
     character = data.get('character', 'Crazy Mita')
     customAPI = data.get('customAPI', '')
+
     character_instructions = load_prompt(character, lang)
 
     try:
+        # ===== OpenAI-style messages =====
         messages = [{"role": "system", "content": character_instructions}]
+
         for msg in history:
             if msg.get("user"):
                 messages.append({"role": "user", "content": msg["user"]})
             if msg.get("assistant", {}).get("content"):
                 messages.append({"role": "assistant", "content": msg["assistant"]["content"]})
+
         for ev in events:
             messages.append({"role": "user", "content": f"(EVENT) {ev}"})
+
         if not events and user_prompt:
             messages.append({"role": "user", "content": user_prompt})
+
         answer_generated = ""
+
+        # ============================================================
+        # ====================== CUSTOM API ==========================
+        # ============================================================
         if customAPI:
             if model_choice == "gemini":
-                gemini_key = customAPI
-                genai.configure(api_key=gemini_key)
-                gemini_model = genai.GenerativeModel("gemini-2.0-flash")
-                gemini_messages = [{"role": "model", "parts": [{"text": character_instructions}]}]
-                for m in history:
-                    if m.get("user"):
-                        gemini_messages.append({"role": "user", "parts": [{"text": m["user"]}]})
-                    if m.get("assistant", {}).get("content"):
-                        gemini_messages.append({"role": "assistant", "parts": [{"text": m["assistant"]["content"]}]})
-                for ev in events:
-                    gemini_messages.append({"role": "user", "parts": [{"text": f"(EVENT) {ev}"}]})
-                if not events and user_prompt:
-                    gemini_messages.append({"role": "user", "parts": [{"text": user_prompt}]})
-                completion = gemini_model.generate_content(
-                    gemini_messages,
-                    generation_config=genai.types.GenerationConfig(
+                client = genai.Client(api_key=customAPI)
+
+                contents = []
+                for m in messages:
+                    contents.append(
+                        types.Content(
+                            role=m["role"],
+                            parts=[types.Part(text=m["content"])]
+                        )
+                    )
+
+                resp = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=contents,
+                    config=types.GenerateContentConfig(
                         temperature=0.3,
                         top_p=0.8,
                         max_output_tokens=350,
                     )
                 )
-                if completion.candidates and completion.candidates[0].content.parts:
-                    answer_generated = completion.candidates[0].content.parts[0].text.strip()
+
+                if resp.candidates:
+                    parts = resp.candidates[0].content.parts
+                    answer_generated = "".join(p.text for p in parts if p.text).strip()
+
             elif model_choice == "mistral":
-                mistral_key = customAPI
-                mistral_client = Mistral(api_key=mistral_key)
+                mistral_client = Mistral(api_key=customAPI)
                 chat_response = mistral_client.chat.complete(
                     model="mistral-small-latest",
                     messages=messages
                 )
                 answer_generated = chat_response.choices[0].message.content.strip()
+
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
+
+        # ============================================================
+        # ====================== POLLINATIONS ========================
+        # ============================================================
         else:
             url = "https://text.pollinations.ai/openai"
-            headers = {"Authorization": f"Bearer {POLLINATIONS_TOKEN}", "Content-Type": "application/json"}
+            headers = {
+                "Authorization": f"Bearer {POLLINATIONS_TOKEN}",
+                "Content-Type": "application/json"
+            }
+
             if model_choice == "gemini":
-                payload = {"model": "gemini-2.5-flash-lite", "messages": messages, "stream": False}
+                payload = {
+                    "model": "gemini-2.5-flash-lite",
+                    "messages": messages,
+                    "stream": False
+                }
             elif model_choice == "mistral":
-                payload = {"model": "mistral-small-3.1-24b-instruct", "messages": messages, "stream": False}
+                payload = {
+                    "model": "mistral-small-3.1-24b-instruct",
+                    "messages": messages,
+                    "stream": False
+                }
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
+
             r = requests.post(url, headers=headers, json=payload, timeout=20)
-            text_resp = r.text.strip()
-            if text_resp:
-                try:
-                    first_json = text_resp.split("\n")[0]
-                    resp_json = json.loads(first_json)
-                    if "choices" in resp_json and resp_json["choices"]:
-                        choice = resp_json["choices"][0]
-                        if "message" in choice and "content" in choice["message"]:
-                            answer_generated = choice["message"]["content"].strip()
-                        elif "delta" in choice and "content" in choice["delta"]:
-                            answer_generated = choice["delta"]["content"].strip()
-                except Exception as e:
-                    logger.error(f"Pollinations decode error: {e} | Raw: {text_resp[:500]}")
+            resp_json = r.json()
+
+            if "choices" in resp_json and resp_json["choices"]:
+                msg = resp_json["choices"][0].get("message", {})
+                content = msg.get("content")
+
+                if isinstance(content, str):
+                    answer_generated = content.strip()
+                elif isinstance(content, list):
+                    answer_generated = "".join(
+                        part.get("text", "")
+                        for part in content
+                        if isinstance(part, dict)
+                    ).strip()
+
+        # ===================== POST PROCESS =====================
+
         answer_generated = remove_emojis(answer_generated)
         answer_generated = clean_markdown_blocks(answer_generated)
-        action, face, player_face, goto, cleaned_response = extract_action_from_output(answer_generated)
-        logger.info(f"Prompt: {user_prompt} | Events: {events} | Model: {model_choice} | CustomAPI: {bool(customAPI)} | Response: {cleaned_response} | Action: {action} | Goto: {goto}")
+
+        action, face, player_face, goto, cleaned_response = extract_action_from_output(
+            answer_generated
+        )
+
+        if not cleaned_response:
+            cleaned_response = "..."
+
+        logger.info(
+            f"Prompt: {user_prompt} | Events: {events} | "
+            f"Model: {model_choice} | CustomAPI: {bool(customAPI)} | "
+            f"Response: {cleaned_response} | Action: {action} | Goto: {goto}"
+        )
+
     except Exception as e:
         logger.exception("Exception during /ask")
         return jsonify({'error': str(e)}), 500
+
     return jsonify({
-        'response': cleaned_response,
-        'action': action,
-        'face': face,
-        'player_face': player_face,
-        'goto': goto,
+        "response": cleaned_response,
+        "action": action,
+        "face": face,
+        "player_face": player_face,
+        "goto": goto,
     })
 
 @app.route('/')
