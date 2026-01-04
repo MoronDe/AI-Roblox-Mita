@@ -124,15 +124,9 @@ def ask():
             if model_choice == "gemini":
                 client = genai.Client(api_key=customAPI)
 
-                contents = []
+                sys_instruct = character_instructions if character_instructions else None
 
-                if character_instructions:
-                    contents.append(
-                        types.Content(
-                            role="user",
-                            parts=[types.Part(text=character_instructions)]
-                        )
-                    )
+                contents = []
 
                 for m in messages:
                     if m["role"] == "system":
@@ -140,17 +134,21 @@ def ask():
 
                     role = "model" if m["role"] == "assistant" else "user"
 
-                    contents.append(
-                        types.Content(
-                            role=role,
-                            parts=[types.Part(text=m["content"])]
+                    if contents and contents[-1].role == role:
+                        contents[-1].parts[0].text += f"\n{m['content']}"
+                    else:
+                        contents.append(
+                            types.Content(
+                                role=role,
+                                parts=[types.Part(text=m["content"])]
+                            )
                         )
-                    )
 
                 resp = client.models.generate_content(
                     model="gemini-1.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
+                        system_instruction=sys_instruct,
                         temperature=0.3,
                         top_p=0.8,
                         max_output_tokens=700,
