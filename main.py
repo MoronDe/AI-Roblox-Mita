@@ -148,7 +148,7 @@ def ask():
                     )
 
                 resp = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-1.5-flash-002",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         temperature=0.3,
