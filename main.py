@@ -124,9 +124,9 @@ def ask():
             if model_choice == "gemini":
                 client = genai.Client(api_key=customAPI)
 
-                sys_instruct = character_instructions if character_instructions else None
-
                 contents = []
+
+                sys_instruct = character_instructions if character_instructions else None
 
                 for m in messages:
                     if m["role"] == "system":
@@ -145,7 +145,7 @@ def ask():
                         )
 
                 resp = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.0-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=sys_instruct,
