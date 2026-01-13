@@ -6,5 +6,4 @@ google
 google.genai
 mistralai
 dotenv
-openai
 emoji

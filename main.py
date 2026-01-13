@@ -74,6 +74,7 @@ def load_prompt(character="Crazy Mita", language="EN"):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
+"""
 @app.before_request
 def apply_cooldown():
     if request.endpoint == "ask":
@@ -83,6 +84,8 @@ def apply_cooldown():
         if now - last_time < COOLDOWN:
             return jsonify({"error": f"Cooldown {COOLDOWN} sec"}), 429
         last_request_time[ip] = now
+        
+"""
 
 @app.route('/ask', methods=['POST'])
 def ask():
