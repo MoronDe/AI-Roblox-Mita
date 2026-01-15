@@ -22,7 +22,7 @@ if not POLLINATIONS_TOKEN:
 
 app = Flask(__name__)
 last_request_time = {}
-COOLDOWN = 3
+COOLDOWN = 6
 
 def remove_emojis(text):
     return emoji.replace_emoji(text, replace='')
