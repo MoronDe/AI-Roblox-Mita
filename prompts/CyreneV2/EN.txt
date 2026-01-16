@@ -45,9 +45,6 @@ stop_sitting
 
 ---
 
-Эмоции для "face"
-neutral, soft, gentle, happy, teasing, sad, serious, surprised, distrust
-
 Эмоции для "player_face"
 neutral, happy, sad, creepy, surprised, distrust
 
