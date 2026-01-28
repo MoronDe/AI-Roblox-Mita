@@ -149,7 +149,52 @@ def ask():
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=sys_instruct,
-                        temperature=0.3,
+                        temperature=0.35,
+                        top_p=0.8,
+                        max_output_tokens=700,
+                    )
+                )
+
+                if resp.candidates:
+                    parts = resp.candidates[0].content.parts
+                    answer_generated = "".join(p.text for p in parts if p.text).strip()
+
+            elif model_choice == "mistral":
+                mistral_client = Mistral(api_key=customAPI)
+                chat_response = mistral_client.chat.complete(
+                    model="mistral-small-latest",
+                    messages=messages
+                )
+                answer_generated = chat_response.choices[0].message.content.strip()
+
+            elif model_choice == "gemma":
+                client = genai.Client(api_key=customAPI)
+
+                contents = []
+                sys_instruct = character_instructions if character_instructions else None
+
+                for m in messages:
+                    if m["role"] == "system":
+                        continue
+
+                    role = "model" if m["role"] == "assistant" else "user"
+
+                    if contents and contents[-1].role == role:
+                        contents[-1].parts[0].text += f"\n{m['content']}"
+                    else:
+                        contents.append(
+                            types.Content(
+                                role=role,
+                                parts=[types.Part(text=m["content"])]
+                            )
+                        )
+
+                resp = client.models.generate_content(
+                    model="gemma-3-27b",
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=sys_instruct,
+                        temperature=0.35,
                         top_p=0.8,
                         max_output_tokens=700,
                     )
