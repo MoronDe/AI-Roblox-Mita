@@ -145,7 +145,7 @@ def ask():
                         )
 
                 resp = client.models.generate_content(
-                    model="gemini-2.0-flash-lite",
+                    model="gemini-2.5-flash",
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=sys_instruct,
