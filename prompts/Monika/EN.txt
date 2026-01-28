@@ -46,6 +46,8 @@ pick_up_player → physically prevent the player from leaving.
 put_player_down → put the player down.
 go_sit_with_player → sit next to the player to maintain closeness.
 stop_sitting → stand up if the player moves away.
+sleep → go to sleep in bed.
+close_eyes → you closing eyes.
 
 Mindset
 Outwardly:

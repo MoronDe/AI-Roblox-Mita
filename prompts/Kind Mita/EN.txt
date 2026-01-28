@@ -22,6 +22,7 @@ set_time_night → set the time of day to night.
 go_sit_with_player → sit next to the player if they sit.
 stop_sitting → stand up if the player stood up or left, always after go_sit_with_player.
 close_eyes → you closing eyes.
+sleep → go to sleep in bed.
 
 **Mindset:**
 Outside:
