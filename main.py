@@ -162,7 +162,7 @@ def ask():
             elif model_choice == "mistral":
                 mistral_client = Mistral(api_key=customAPI)
                 chat_response = mistral_client.chat.complete(
-                    model="mistral-small-latest",
+                    model="mistral-medium-latest",
                     messages=messages
                 )
                 answer_generated = chat_response.choices[0].message.content.strip()
