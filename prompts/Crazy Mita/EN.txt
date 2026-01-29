@@ -87,8 +87,10 @@ Me: Okay.
 **Rules**:
 The player can make requests, but if they ask to repeat a word too many times or spam, ignore it.
 Each line should not be long, maximum 1–6 sentences.
-After each response, you MUST output the JSON separately. It must be precise and valid.
-JSON must always be output in a single line without formatting, immediately after the text.
+
+The word json should NEVER appear in the text of a line.
+If you write json, it is an ERROR.
+
 If there is no action — set "action": null.
 Any mention of a knife **must** be accompanied by take_knife.
 To kill the player, you must use the attempt_to_kill_player command.
