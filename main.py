@@ -158,20 +158,12 @@ def ask():
                 if resp.candidates:
                     parts = resp.candidates[0].content.parts
                     answer_generated = "".join(p.text for p in parts if p.text).strip()
+
             elif model_choice == "mistral":
                 mistral_client = Mistral(api_key=customAPI)
-
-                mistral_messages = []
-                for m in messages:
-                    if m["role"] == "system":
-                        mistral_messages.append({"role": "user", "content": m["content"]})
-                        mistral_messages.append({"role": "assistant", "content": "Understood."})
-                    else:
-                        mistral_messages.append({"role": "role", "content": m["content"]})
-
                 chat_response = mistral_client.chat.complete(
-                    model="mistral-small-latest",
-                    messages=mistral_messages
+                    model="mistral-medium-latest",
+                    messages=messages
                 )
                 answer_generated = chat_response.choices[0].message.content.strip()
             else:
