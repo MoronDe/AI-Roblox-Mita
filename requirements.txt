@@ -4,6 +4,6 @@ flask_limiter
 gunicorn
 google
 google.genai
-mistralai
+mistralai>=1.0.0
 dotenv
 emoji
