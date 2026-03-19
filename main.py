@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from mistralai import Mistral
+from mistralai.client import MistralClient
+from mistralai.models.chat_completion import ChatMessage
 import emoji
 
 load_dotenv()
@@ -158,15 +159,22 @@ def ask():
                 if resp.candidates:
                     parts = resp.candidates[0].content.parts
                     answer_generated = "".join(p.text for p in parts if p.text).strip()
-
             elif model_choice == "mistral":
-                mistral_client = Mistral(api_key=customAPI)
-                chat_response = mistral_client.chat.complete(
-                    model="mistral-small-latest",
-                    messages=messages
-                )
-                answer_generated = chat_response.choices[0].message.content.strip()
+                mistral_client = MistralClient(api_key=customAPI)
+                mistral_messages = []
+                for m in messages:
+                    if m["role"] == "system":
+                        mistral_messages.append(ChatMessage(role="user", content=m["content"]))
+                        mistral_messages.append(ChatMessage(role="assistant", content="Understood."))
+                    else:
+                        mistral_messages.append(ChatMessage(role=m["role"], content=m["content"]))
 
+                chat_response = mistral_client.chat(
+                    model="mistral-small-latest",
+                    messages=mistral_messages
+                )
+
+                answer_generated = chat_response.choices[0].message.content.strip()
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
