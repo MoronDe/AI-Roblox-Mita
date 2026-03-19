@@ -1,9 +1,9 @@
+mistralai
 flask
 flask_cors
 flask_limiter
 gunicorn
 google
 google.genai
-mistralai
 dotenv
 emoji
