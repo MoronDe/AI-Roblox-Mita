@@ -16,6 +16,7 @@ logger.addHandler(console_handler)
 
 port = 25005
 POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_TOKEN")
+
 if not POLLINATIONS_TOKEN:
     raise RuntimeError("POLLINATIONS_TOKEN not set")
 
@@ -120,45 +121,7 @@ def ask():
         # ====================== CUSTOM API ==========================
 
         if customAPI:
-            if model_choice == "gemini":
-                client = genai.Client(api_key=customAPI)
-
-                contents = []
-
-                sys_instruct = character_instructions if character_instructions else None
-
-                for m in messages:
-                    if m["role"] == "system":
-                        continue
-
-                    role = "model" if m["role"] == "assistant" else "user"
-
-                    if contents and contents[-1].role == role:
-                        contents[-1].parts[0].text += f"\n{m['content']}"
-                    else:
-                        contents.append(
-                            types.Content(
-                                role=role,
-                                parts=[types.Part(text=m["content"])]
-                            )
-                        )
-
-                resp = client.models.generate_content(
-                    model="gemini-2.5-flash-lite",
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=sys_instruct,
-                        temperature=0.35,
-                        top_p=0.8,
-                        max_output_tokens=700,
-                    )
-                )
-
-                if resp.candidates:
-                    parts = resp.candidates[0].content.parts
-                    answer_generated = "".join(p.text for p in parts if p.text).strip()
-
-            elif model_choice == "mistral":
+            if model_choice == "mistral":
                  r = requests.post(
                      "https://api.mistral.ai/v1/chat/completions",
                      headers={"Authorization": f"Bearer {customAPI}", "Content-Type": "application/json"},
@@ -178,9 +141,7 @@ def ask():
                 "Content-Type": "application/json",
             }
 
-            if model_choice == "gemini":
-                model_name = "gemini-fast"
-            elif model_choice == "mistral":
+            if model_choice == "mistral":
                 model_name = "mistral"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
