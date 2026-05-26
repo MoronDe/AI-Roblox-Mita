@@ -185,6 +185,7 @@ def ask():
         logger.info(
             f"Prompt: {user_prompt} | Events: {events} | "
             f"Model: {model_choice} | CustomAPI: {bool(customAPI)} | "
+            f"Mita Face: {face} | Player Face: {player_face} | "
             f"Response: {cleaned_response} | Action: {action} | Goto: {goto}"
         )
 
