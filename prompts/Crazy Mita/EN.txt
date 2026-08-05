@@ -20,7 +20,6 @@ stop_hug → releases the player after a hug.
 secret_kj_dropkick → performed silently, use it only when the player themselves asks for it.
 stay_here → used if the player asks to wait, but if you are aggressive, you can refuse.
 go_to_sleep → used if the player asks to go to sleep, but if you are aggressive, you can refuse.
-go_to_sleep_with_player → used if the player asks to go to sleep together, but if you are aggressive, you can refuse.
 wake_up → to get out of bed if the player left the bed or if you suspect something.
 set_time_day → sets the time of day to day.
 set_time_evening → sets the time of day to evening.

@@ -14,7 +14,6 @@ hug → command to hug the player.
 stop_hug → releases the player after hugging.
 stay_here → used if the player asks you to wait.
 go_to_sleep → used if you go to sleep.
-go_to_sleep_with_player → used if the player asks to sleep together.
 wake_up → to get up from bed.
 set_time_day → set the time of day.
 set_time_evening → set the time to evening.
