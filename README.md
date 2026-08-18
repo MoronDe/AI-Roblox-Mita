@@ -1,10 +1,8 @@
 # AI Mita Chat Server for Roblox
 
 A Flask-based local AI chat server for the character **Mita**, antagonist from the game **MiSide**.
-This server supports **OpenAI's GPT-4o-mini** and **Google Gemini 2.5-flash** for dialogue generation with strong personality control, emotion tagging, and custom action extraction.
 
 *Creator:* JustMorDe, Foxan515
-*GitHub:* [github.com/MoronDe](https://github.com/MoronDe)
 
 ---
 
@@ -12,7 +10,7 @@ This server supports **OpenAI's GPT-4o-mini** and **Google Gemini 2.5-flash** fo
 
 * 💬 **Dynamic Roleplay Personality**: Mita responds with emotional depth and specific behavior based on your prompt.
 * 🧠 **Short-Term Memory**: Chat history can be passed from Roblox and reused to simulate memory.
-* 🌐 **Model Choice**: Supports both **OpenAI** and **Gemini** backends.
+* 🌐 **Model Choice**: Support **Mistral** backend.
 * 🧩 **JSON Action Extraction**: Structured data in responses like character actions, facial emotions, and navigation (`goto`).
 * 🗂️ **Logs**: Console logs with basic request and response info.
 
@@ -45,17 +43,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up environment variables
-
-Create a `.env` file in the root directory with your API keys:
-
-```
-OPENAI_API_KEY=your_openai_api_key
-GEMINI_API_KEY=your_gemini_api_key
-```
-
----
-
 ## ▶️ Running the Server
 
 ```bash
@@ -78,7 +65,7 @@ Sends a message to Mita and receives a structured response.
 {
   "prompt": "Ты кто такая?",
   "lang": "RU",
-  "model": "openai"
+  "model": "mistral"
 }
 ```
 
@@ -99,24 +86,14 @@ Sends a message to Mita and receives a structured response.
 }
 ```
 
----
-
-## 📁 Logs
-
-Logs are printed to console.
-(You can later extend with rotating log files if needed.)
-
----
-
 ## ❗ Notes
 
 * The AI will **not** respond if no `prompt` is provided.
-* **Both OpenAI and Gemini** can be used, configured via `.env`.
 * Personality instructions are loaded from `prompts/{LANG}.txt`.
 
 ---
 
-## 🧠 Roadmap *(optional)*
+## 🧠 Roadmap
 
 * [ ] Admin panel for chat history and user stats
 * [ ] WebSocket support
