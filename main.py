@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import emoji
 
+
 load_dotenv()
 warnings.filterwarnings("ignore", category=UserWarning) # sybau plz
 
