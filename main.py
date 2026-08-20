@@ -132,6 +132,7 @@ def ask():
 
         # ====================== POLLINATIONS ========================
 
+
         else:
             url = "https://gen.pollinations.ai/v1/chat/completions"
             headers = {
