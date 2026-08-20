@@ -5,4 +5,5 @@ flask_limiter
 gunicorn
 openai
 dotenv
+requests
 emoji
