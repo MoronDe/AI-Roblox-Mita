@@ -1,8 +1,6 @@
 import os, json, re, logging, warnings, signal, requests, time
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
 import emoji
 
 load_dotenv()
@@ -142,7 +140,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "vendouple/gemma-4-31b-sdft-heretic-rp"
+                model_name = "gpt-oss"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
