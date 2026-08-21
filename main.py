@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "vendouple/deepseek-v4-pro"
+                model_name = "MarcosFRG/gpt-5.6-luna"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
