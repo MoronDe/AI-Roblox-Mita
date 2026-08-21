@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "vendouple/gemma-4-31b-sdft-heretic-rp"
+                model_name = "chigwell/gpt-5.4-mini"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
