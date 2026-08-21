@@ -123,7 +123,7 @@ def ask():
                      "https://api.mistral.ai/v1/chat/completions",
                      headers={"Authorization": f"Bearer {customAPI}", "Content-Type": "application/json"},
                      json={"model": "mistral-medium-latest", "messages": messages, "max_tokens": 700, "temperature": 0.35},
-                     timeout=10
+                     timeout=30
                  )
                  answer_generated = r.json()["choices"][0]["message"]["content"].strip()
             else:
@@ -149,7 +149,7 @@ def ask():
                 "stream": False,
             }
 
-            r = requests.post(url, headers=headers, json=payload, timeout=10)
+            r = requests.post(url, headers=headers, json=payload, timeout=30)
 
             try:
                 resp_json = r.json()
