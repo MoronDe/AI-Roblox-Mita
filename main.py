@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "chigwell/gpt-5.4-mini"
+                model_name = "Takax62/minimax-m3-429b-vml"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
