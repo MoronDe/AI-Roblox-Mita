@@ -99,7 +99,6 @@ def ask():
     character_instructions = load_prompt(character, lang)
 
     try:
-        # ===== OpenAI-style messages =====
         messages = [{"role": "system", "content": character_instructions}]
 
         for msg in history:
@@ -129,10 +128,6 @@ def ask():
                  answer_generated = r.json()["choices"][0]["message"]["content"].strip()
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
-
-        # ====================== POLLINATIONS ========================
-
-
         else:
             url = "https://gen.pollinations.ai/v1/chat/completions"
             headers = {
@@ -155,9 +150,16 @@ def ask():
             }
 
             r = requests.post(url, headers=headers, json=payload, timeout=30)
-            resp_json = r.json()
 
-            # === OpenAI compatible response ===
+            try:
+                resp_json = r.json()
+            except ValueError:
+                logger.error(f"Pollinations non-JSON response: {r.status_code} {r.text[:500]}")
+                resp_json = {}
+
+            if r.status_code != 200 or "choices" not in resp_json:
+                logger.error(f"Pollinations API error: status={r.status_code} body={resp_json}")
+
             if "choices" in resp_json and resp_json["choices"]:
                 choice = resp_json["choices"][0]
                 msg = choice.get("message", {})
@@ -171,8 +173,6 @@ def ask():
                         for part in content
                         if isinstance(part, dict)
                     ).strip()
-
-        # ===================== POST PROCESS =====================
 
         answer_generated = remove_emojis(answer_generated)
         answer_generated = clean_markdown_blocks(answer_generated)
