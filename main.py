@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "NamanSoni78/gemini-3.8-flash"
+                model_name = "MarcosFRG/qwen3.8-27b"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
