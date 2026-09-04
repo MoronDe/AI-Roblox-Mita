@@ -143,7 +143,7 @@ def ask():
             payload = {
                 "model": model_name,
                 "messages": messages,
-                "temperature": 0.3,
+                "temperature": 0.5,
                 "top_p": 0.8,
                 "max_tokens": 700,
                 "stream": False,
