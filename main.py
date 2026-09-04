@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "gpt-oss"
+                model_name = "MarcosFRG/gemma-4-31b"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
