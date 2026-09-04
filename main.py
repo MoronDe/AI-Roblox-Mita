@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "MarcosFRG/gemma-4-31b"
+                model_name = "deepseek/deepseek-v4-flash-vision-exp"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
