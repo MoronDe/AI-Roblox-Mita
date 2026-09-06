@@ -128,14 +128,14 @@ def ask():
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
         else:
-            url = "https://api.chatanywhere.org/v1/chat/completions"
+            url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {POLLINATIONS_TOKEN}",
                 "Content-Type": "application/json",
             }
 
             if model_choice == "mistral":
-                model_name = "gpt-5.6-luna"
+                model_name = "llama-3.3-70b-versatile"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
