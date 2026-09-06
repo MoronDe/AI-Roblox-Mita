@@ -136,7 +136,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "deepseek/deepseek-v4-flash-vision-exp"
+                model_name = "iotserver24/deepseek-v4f-free"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
