@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import emoji
 
 load_dotenv()
-warnings.filterwarnings("ignore", category=UserWarning) # sybau plz
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger = logging.getLogger("MitaAI")
 logger.setLevel(logging.INFO)
@@ -12,7 +12,6 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(console_handler)
 
-port = 25005
 POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_TOKEN")
 
 if not POLLINATIONS_TOKEN:
@@ -136,7 +135,7 @@ def ask():
             }
 
             if model_choice == "mistral":
-                model_name = "deepseek-v4-pro"
+                model_name = "gpt-5.6-luna"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
@@ -208,4 +207,4 @@ signal.signal(signal.SIGINT, lambda s, f: exit(0))
 signal.signal(signal.SIGTERM, lambda s, f: exit(0))
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=25005, debug=False)
