@@ -129,21 +129,21 @@ def ask():
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
         else:
-            url = "https://gen.pollinations.ai/v1/chat/completions"
+            url = "https://api.chatanywhere.org/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {POLLINATIONS_TOKEN}",
                 "Content-Type": "application/json",
             }
 
             if model_choice == "mistral":
-                model_name = "iotserver24/deepseek-v4f-free"
+                model_name = "deepseek-v4-pro"
             else:
                 return jsonify({'error': 'Invalid model choice'}), 400
 
             payload = {
                 "model": model_name,
                 "messages": messages,
-                "temperature": 0.5,
+                "temperature": 1.1,
                 "top_p": 0.8,
                 "max_tokens": 700,
                 "stream": False,
